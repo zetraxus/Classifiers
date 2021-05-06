@@ -17,9 +17,7 @@ def save_results(metrics, ds_name, classifier_name):
 
 if __name__ == "__main__":
     dataset_path = "../data/"
-    nb, lccp, sprint = NaiveBayes(), LCCP(), SPRINT()
 
-    classifiers = [nb, lccp, sprint]
     datasets_names = ["bank", "cmc", "diabetes", "occupancy", "skin", "wine"]
     train_ratio = 0.8
 
@@ -29,16 +27,18 @@ if __name__ == "__main__":
 
             # create dataset object
             dataset = Dataset(csv_input, train_ratio)
-            train = dataset.getTrainSet()
-            test = dataset.getTestSet()
+            train_ds = dataset.getTrainSet()
+            test_ds = dataset.getTestSet()
 
+        nb, lccp, sprint = NaiveBayes(), LCCP(), SPRINT()
+        classifiers = [nb, lccp, sprint]
         for classifier in classifiers:
             # train
-            classifier.train(dataset.getTrainSet())
+            classifier.train(train_ds)
 
             # test
             true, predicted = [], []
-            for row in dataset.getTestSet():
+            for row in test_ds:
                 sample, gt = row[:-1], row[-1]
                 predicted_class = classifier.predict(sample)
                 true.append(gt), predicted.append(predicted_class)
