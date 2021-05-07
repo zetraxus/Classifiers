@@ -51,11 +51,22 @@ class LCPC(Algorithm):
                     useful_row = True
                 else:
                     row = f'{row}0'
+
             if useful_row:
                 if row not in filtered_dataset:
                     filtered_dataset[row] = set()
-
                 filtered_dataset[row].add(self.data[i][-1])
+
+        min_cp = dict()
+        for k, v in filtered_dataset.items():
+            if len(v) == 1:
+                cl = list(v)[0]
+                if cl in min_cp and min_cp[cl][0].count('1') >= k.count('1'):
+                    min_cp[cl].append(k)
+                if cl not in min_cp:
+                    min_cp[cl] = [k]
+        if len(min_cp) > 1:
+            a = 0
 
 
 class SPRINT(Algorithm):
