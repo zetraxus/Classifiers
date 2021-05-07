@@ -42,7 +42,6 @@ class LCPC(Algorithm):
 
     def predict(self, sample):
         filtered_dataset = dict()
-
         for i in range(self.data.shape[0]):
             useful_row, row = False, ""
             for j in range(len(sample)):
@@ -54,17 +53,18 @@ class LCPC(Algorithm):
 
             if useful_row:
                 if row not in filtered_dataset:
-                    filtered_dataset[row] = set()
-                filtered_dataset[row].add(self.data[i][-1])
+                    filtered_dataset[row] = dict()
+                if self.data[i][-1] not in filtered_dataset[row]:
+                    filtered_dataset[row][self.data[i][-1]] = 0
+                filtered_dataset[row][self.data[i][-1]] += 1
 
         min_cp = dict()
         for k, v in filtered_dataset.items():
             if len(v) == 1:
-                cl = list(v)[0]
-                if cl in min_cp and min_cp[cl][0].count('1') >= k.count('1'):
-                    min_cp[cl].append(k)
+                cl, cnt = list(v.keys())[0], list(v.values())[0]
                 if cl not in min_cp:
-                    min_cp[cl] = [k]
+                    min_cp[cl] = []
+                min_cp[cl].append((k, cnt))
         if len(min_cp) > 1:
             a = 0
 
