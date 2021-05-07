@@ -41,7 +41,7 @@ class LCPC(Algorithm):
                 self.class_distr[cl] += 1
 
     def predict(self, sample):
-        filtered_dataset = dict()
+        filtered_dataset, min_cp = dict(), dict()
         for i in range(self.data.shape[0]):
             useful_row, row = False, ""
             for j in range(len(sample)):
@@ -58,15 +58,15 @@ class LCPC(Algorithm):
                     filtered_dataset[row][self.data[i][-1]] = 0
                 filtered_dataset[row][self.data[i][-1]] += 1
 
-        min_cp = dict()
         for k, v in filtered_dataset.items():
             if len(v) == 1:
                 cl, cnt = list(v.keys())[0], list(v.values())[0]
-                if cl not in min_cp:
-                    min_cp[cl] = []
-                min_cp[cl].append((k, cnt))
-        if len(min_cp) > 1:
-            a = 0
+                if cl not in min_cp or min_cp[cl][0][0].count('1') > k.count('1'):
+                    min_cp[cl] = [(k, cnt)]
+                elif min_cp[cl][0][0].count('1') == k.count('1'):
+                    min_cp[cl].append((k, cnt))
+
+        # TODO continue here
 
 
 class SPRINT(Algorithm):
