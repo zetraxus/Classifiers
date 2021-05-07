@@ -27,6 +27,7 @@ rm data/bank-names.txt data/bank.csv data/bank.zip
 mv data/bank-full.csv data/bank.csv
 sed -i '1d' data/bank.csv
 sed -i 's/;/,/g' data/bank.csv
+sed -i 's/"//g' data/bank.csv
 
 sed -i 's/\t/,/g' data/skin.txt
 sed -i 's/ /,/g' data/skin.txt

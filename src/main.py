@@ -1,6 +1,6 @@
 import csv
 
-from src.algorithms import NaiveBayes, LCCP, SPRINT
+from src.algorithms import NaiveBayes, LCPC, SPRINT
 from src.dataset import Dataset
 
 
@@ -18,7 +18,8 @@ def save_results(metrics, ds_name, classifier_name):
 if __name__ == "__main__":
     dataset_path = "../data/"
 
-    datasets_names = ["bank", "cmc", "diabetes", "occupancy", "skin", "wine"]
+    # datasets_names = ["bank", "cmc", "diabetes", "occupancy", "skin", "wine"]
+    datasets_names = ["skin"]
     train_ratio = 0.8
 
     for ds_name in datasets_names:
@@ -30,8 +31,9 @@ if __name__ == "__main__":
             train_ds = dataset.getTrainSet()
             test_ds = dataset.getTestSet()
 
-        nb, lccp, sprint = NaiveBayes(), LCCP(), SPRINT()
-        classifiers = [nb, lccp, sprint]
+        nb, lcpc, sprint = NaiveBayes(), LCPC(), SPRINT()
+        # classifiers = [nb, lcpc, sprint]
+        classifiers = [lcpc]
         for classifier in classifiers:
             # train
             classifier.train(train_ds)
@@ -43,8 +45,8 @@ if __name__ == "__main__":
                 predicted_class = classifier.predict(sample)
                 true.append(gt), predicted.append(predicted_class)
 
-            # calc metrics
-            metrics = calc_metrics(true, predicted)
-
-            # save results
-            save_results(metrics, ds_name, classifier.__name__)
+            # # calc metrics
+            # metrics = calc_metrics(true, predicted)
+            #
+            # # save results
+            # save_results(metrics, ds_name, classifier.__name__)

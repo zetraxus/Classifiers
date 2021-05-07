@@ -5,6 +5,7 @@ from math import floor
 class Dataset:
     def __init__(self, input, split_ratio):
         self.data = []
+
         for row in input:
             self.data.append(row)
 
