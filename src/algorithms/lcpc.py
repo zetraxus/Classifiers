@@ -24,21 +24,37 @@ class LCPC(Algorithm):
 
     def predict(self, sample):
         filtered_dataset = self.__filter_dataset(sample)
-        pattern_matches = list()
+        results = dict()
+
         for i in range(1, len(sample) + 1):
-            print(i)
+            pattern_matches = dict()
             patterns = list(self.__generate_combinations(len(sample), i))
             for p in patterns:
-                options = []
-                for k, v in filtered_dataset.items():
-                    if self.__check_pattern(p, k):
-                        options.append(k)
+                pattern_matches = self.__analyse_pattern(p, filtered_dataset, pattern_matches)
 
-                if options:
-                    succ, cl_name, cl_cnt = self.__check_options(filtered_dataset, options)
-                    if succ:
-                        pattern_matches.append((cl_name, cl_cnt))
-        print('# ', len(pattern_matches))
+            for k, v in pattern_matches.items():
+                if k not in results.keys():
+                    results[k] = v
+
+            if len(results) == len(self.class_distr):
+                break
+
+        return self.__best_match_class(results)
+
+    def __analyse_pattern(self, pattern, filtered_dataset, pattern_matches):
+        options = list()
+        for k, v in filtered_dataset.items():
+            if self.__check_pattern(pattern, k):
+                options.append(k)
+
+        if options:
+            success, cl_name, cl_cnt = self.__check_options(filtered_dataset, options)
+            if success:
+                if cl_name not in pattern_matches:
+                    pattern_matches[cl_name] = 0
+                pattern_matches[cl_name] += cl_cnt
+
+        return pattern_matches
 
     @staticmethod
     def __generate_combinations(length, count):
@@ -68,29 +84,42 @@ class LCPC(Algorithm):
 
     @staticmethod
     def __check_pattern(pattern, sample):
-        match = True
         for i in range(len(pattern)):
             if pattern[i] == '1':
                 if sample[i] != '1':
-                    match = False
-                    break
-        return match
+                    return False
+        return True
 
     @staticmethod
     def __check_options(filtered_dataset, options):
-        class_name, class_cnt, success = "", 0, True
+        class_name, class_cnt = "", 0
         for option in options:
             if len(filtered_dataset[option]) > 1:
-                success = False
-                break
+                return False, None, None
             else:
                 option_dict = filtered_dataset[option]
                 cl = list(option_dict.keys())[0]
                 cnt = option_dict[cl]
-                if class_name or class_name == cl:
+                if class_name == "" or class_name == cl:
                     class_name = cl
                     class_cnt += cnt
                 else:
-                    success = False
-                    break
-        return success, class_name, class_cnt
+                    return False, None, None
+        return True, class_name, class_cnt
+
+    def __most_popular_class(self):
+        cl, cnt = None, -1
+        for k, v in self.class_distr.items():
+            if v > cnt:
+                cl, cnt = k, v
+        return cl
+
+    def __best_match_class(self, results):
+        rating = list()
+        if len(results):
+            for k, v in results.items():
+                rating.append((k, v / self.class_distr[k]))
+            rating.sort(key=lambda tup: tup[1])
+            return rating[0][0]
+        else:
+            return self.__most_popular_class()

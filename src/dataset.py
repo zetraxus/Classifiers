@@ -14,9 +14,7 @@ class Dataset:
         random.shuffle(self.data)
 
     def getTrainSet(self):
-        # return "first split_ratio * dataset size" elements
         return self.data[:floor(self.dataset_size * self.split_ratio)]
 
     def getTestSet(self):
-        # return last "split_ratio * dataset size" elements
         return self.data[floor(self.dataset_size * self.split_ratio):]
