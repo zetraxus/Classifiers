@@ -22,22 +22,27 @@ def save_results(metrics, ds_name, classifier_name):
 
 
 if __name__ == "__main__":
-    dataset_path = "../data/"
+    dataset_path, train_ratio, buckets = "../data/", 0.8, 10
+    datasets_info = {
+        "bank": ['n', 'e', 'e', 'e', 'e', 'n', 'e', 'e', 'e', 'n', 'n', 'n', 'e'],
+        "skin": ['n'] * 3,
+        "cmc": ['n'] * 9,
+        "diabetes": ['n'] * 8,
+        "occupancy": ['n'] * 5,
+        "wine": ['n'] * 11
+    }
 
-    # datasets_names = ["bank", "cmc", "diabetes", "occupancy", "skin", "wine"]
-    datasets_names = ["skin"]
-    train_ratio = 0.8
-
-    for ds_name in datasets_names:
+    for ds_name in datasets_info.keys():
         with open(dataset_path + ds_name + ".csv") as f:
             csv_input = csv.reader(f, delimiter=',')
 
             # create dataset object
-            dataset = Dataset(csv_input, train_ratio)
+            dataset = Dataset(csv_input, train_ratio, datasets_info[ds_name], buckets)
             train_ds = dataset.getTrainSet()
             test_ds = dataset.getTestSet()
 
         nb, lcpc, sprint = NaiveBayes(), LCPC(), SPRINT()
+
         # classifiers = [nb, lcpc, sprint]
         classifiers = [lcpc]
         for classifier in classifiers:
@@ -46,7 +51,11 @@ if __name__ == "__main__":
 
             # test
             true, predicted = [], []
+            i = 0
             for row in test_ds:
+                i += 1
+                if i == 20:
+                    break
                 sample, gt = row[:-1], row[-1]
                 predicted_class = classifier.predict(sample)
                 true.append(gt), predicted.append(predicted_class)
