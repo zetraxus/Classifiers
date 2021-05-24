@@ -44,11 +44,11 @@ if __name__ == "__main__":
         classifiers = [nb, lcpc]
         for classifier in classifiers:
             if classifier.__class__.__name__ in ["NaiveBayes", "SPRINT"]:
-                train_ds = dataset.getTrainSet(buckets=True)
-                test_ds = dataset.getTestSet(buckets=True)
+                train_ds = dataset.get_train_set(buckets=True)
+                test_ds = dataset.get_test_set(buckets=True)
             else:
-                train_ds = dataset.getTrainSet(buckets=False)
-                test_ds = dataset.getTestSet(buckets=False)
+                train_ds = dataset.get_train_set(buckets=False)
+                test_ds = dataset.get_test_set(buckets=False)
 
             # train
             classifier.train(train_ds)
