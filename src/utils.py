@@ -1,6 +1,6 @@
 import csv
 
-from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score, classification_report
 
 from src.dataset import Dataset
 
@@ -24,15 +24,13 @@ def test(classifier, test_ds):
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
 def calc_metrics(true, predicted):
-    prf = precision_recall_fscore_support(true, predicted, zero_division=0)
-    acc = accuracy_score(true, predicted)
-    return prf, acc
+    return classification_report(true, predicted, zero_division=0)
 
 
-def save_results(metrics, ds_name, classifier_name):
-    for i in range(len(metrics[0]) - 1):
-        print(ds_name, classifier_name, metrics[0][i])
-    print(ds_name, classifier_name, metrics[1])
+def save_results(results_report, ds_name, classifier_name):
+    print(ds_name, classifier_name)
+    print(results_report)
+    print("============")
 
 
 def create_dataset(ds_path, ds_name, train_ratio, ds_info, buckets):

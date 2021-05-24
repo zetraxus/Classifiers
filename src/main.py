@@ -21,5 +21,5 @@ if __name__ == "__main__":
         for classifier in classifiers:
             train_ds, test_ds = split_dataset(dataset, classifier.__class__.__name__)
             train(classifier, train_ds)
-            metrics = test(classifier, test_ds)
-            save_results(metrics, ds_name, classifier.__class__.__name__)
+            results_report = test(classifier, test_ds)
+            save_results(results_report, ds_name, classifier.__class__.__name__)
