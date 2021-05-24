@@ -1,6 +1,6 @@
 from src.algorithms.lcpc import LCPC
 from src.algorithms.naive_bayes import NaiveBayes
-from src.utils import create_dataset, train, test, save_results
+from src.utils import create_dataset, train, test, save_results, split_dataset
 
 if __name__ == "__main__":
     dataset_path, train_ratio, buckets = "../data/", 0.8, 10
@@ -19,11 +19,7 @@ if __name__ == "__main__":
         classifiers = [NaiveBayes(), LCPC()]
 
         for classifier in classifiers:
-            if classifier.__class__.__name__ in ["NaiveBayes", "SPRINT"]:
-                train_ds, test_ds = dataset.get_train_set(buckets=True), dataset.get_test_set(buckets=True)
-            else:
-                train_ds, test_ds = dataset.get_train_set(buckets=False), dataset.get_test_set(buckets=False)
-
+            train_ds, test_ds = split_dataset(dataset, classifier.__class__.__name__)
             train(classifier, train_ds)
             metrics = test(classifier, test_ds)
             save_results(metrics, ds_name, classifier.__class__.__name__)

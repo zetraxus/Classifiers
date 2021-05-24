@@ -39,3 +39,10 @@ def create_dataset(ds_path, ds_name, train_ratio, ds_info, buckets):
     with open(ds_path + ds_name + ".csv") as f:
         csv_input = csv.reader(f, delimiter=',')
         return Dataset(csv_input, train_ratio, ds_info[ds_name], buckets)
+
+
+def split_dataset(dataset, classifier_name):
+    if classifier_name in ["NaiveBayes", "SPRINT"]:
+        return dataset.get_train_set(buckets=True), dataset.get_test_set(buckets=True)
+    else:
+        return dataset.get_train_set(buckets=False), dataset.get_test_set(buckets=False)
