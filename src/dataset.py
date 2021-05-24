@@ -50,14 +50,14 @@ class Dataset:
             next_row.append(row[len(row)-1])
             self.data_in_buckets.append(next_row)
 
-    def getTrainSet(self, buckets=False):
+    def get_train_set(self, buckets=False):
         split_position = floor(self.dataset_size * self.split_ratio)
         if buckets:
             return self.data_in_buckets[:split_position]
         else:
             return self.data[:split_position]
 
-    def getTestSet(self, buckets=False):
+    def get_test_set(self, buckets=False):
         split_position = floor(self.dataset_size * self.split_ratio)
         if buckets:
             return self.data_in_buckets[split_position:]
