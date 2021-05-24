@@ -8,10 +8,11 @@ class Dataset:
         self.column_types = column_types
 
         self.__prepare_data(input, column_types)
+        random.shuffle(self.data)
+
         self.__split_data_into_buckets(buckets)
         self.dataset_size = len(self.data)
         self.split_ratio = split_ratio
-        random.shuffle(self.data)
 
     def __prepare_data(self, input, column_types):
         for i in range(len(column_types)):
