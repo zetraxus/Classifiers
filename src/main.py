@@ -24,8 +24,8 @@ def save_results(metrics, ds_name, classifier_name):
 if __name__ == "__main__":
     dataset_path, train_ratio, buckets = "../data/", 0.8, 10
     datasets_info = {
-        "bank": ['n', 'e', 'e', 'e', 'e', 'n', 'e', 'e', 'e', 'n', 'n', 'n', 'e'],
         "skin": ['n'] * 3,
+        "bank": ['n', 'e', 'e', 'e', 'e', 'n', 'e', 'e', 'e', 'n', 'n', 'n', 'e'],
         "cmc": ['n'] * 9,
         "diabetes": ['n'] * 8,
         "occupancy": ['n'] * 5,
@@ -35,17 +35,21 @@ if __name__ == "__main__":
     for ds_name in datasets_info.keys():
         with open(dataset_path + ds_name + ".csv") as f:
             csv_input = csv.reader(f, delimiter=',')
-
             # create dataset object
             dataset = Dataset(csv_input, train_ratio, datasets_info[ds_name], buckets)
-            train_ds = dataset.getTrainSet()
-            test_ds = dataset.getTestSet()
 
         nb, lcpc, sprint = NaiveBayes(), LCPC(), SPRINT()
 
         # classifiers = [nb, lcpc, sprint]
-        classifiers = [lcpc]
+        classifiers = [nb, lcpc]
         for classifier in classifiers:
+            if classifier.__class__.__name__ in ["NaiveBayes", "SPRINT"]:
+                train_ds = dataset.getTrainSet(buckets=True)
+                test_ds = dataset.getTestSet(buckets=True)
+            else:
+                train_ds = dataset.getTrainSet(buckets=False)
+                test_ds = dataset.getTestSet(buckets=False)
+
             # train
             classifier.train(train_ds)
 

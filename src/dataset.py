@@ -4,7 +4,7 @@ from math import floor
 
 class Dataset:
     def __init__(self, input, split_ratio, column_types, buckets):
-        self.data, self.data_buckets, self.info = [], [], []
+        self.data, self.data_in_buckets, self.info = [], [], []
         self.column_types = column_types
 
         self.__prepare_data(input, column_types)
@@ -47,11 +47,19 @@ class Dataset:
                     next_row.append(bucket)
                 else:
                     next_row.append(row[i])
+            next_row.append(row[len(row)-1])
+            self.data_in_buckets.append(next_row)
 
-            self.data_buckets.append(next_row)
+    def get_train_set(self, buckets=False):
+        split_position = floor(self.dataset_size * self.split_ratio)
+        if buckets:
+            return self.data_in_buckets[:split_position]
+        else:
+            return self.data[:split_position]
 
-    def getTrainSet(self):
-        return self.data[:floor(self.dataset_size * self.split_ratio)]
-
-    def getTestSet(self):
-        return self.data[floor(self.dataset_size * self.split_ratio):]
+    def get_test_set(self, buckets=False):
+        split_position = floor(self.dataset_size * self.split_ratio)
+        if buckets:
+            return self.data_in_buckets[split_position:]
+        else:
+            return self.data[split_position:]
