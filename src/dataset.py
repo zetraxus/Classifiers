@@ -3,32 +3,51 @@ from math import floor
 
 
 class Dataset:
-    def __init__(self, input, split_ratio, info, buckets):
-        self.data = []
+    def __init__(self, input, split_ratio, column_types, buckets):
+        self.data, self.data_buckets, self.info = [], [], []
+        self.column_types = column_types
 
-        possibilities = []
-        for i in range(len(info)):
-            possibilities.append(dict())
-
-        for row in input:
-            row_without_strings = row
-            for i in range(len(row) - 1):
-                if info[i] == 'e':
-                    if row[i] not in possibilities[i]:
-                        possibilities[i][row[i]] = len(possibilities[i])
-                    row_without_strings[i] = possibilities[i][row[i]]
-                else:
-                    if 'min' not in possibilities[i] or row[i] < possibilities[i]['min']:
-                        possibilities[i]['min'] = row[i]
-                    if 'max' not in possibilities[i] or row[i] > possibilities[i]['max']:
-                        possibilities[i]['max'] = row[i]
-
-            self.data.append(row_without_strings)
-
-        self.info = info
+        self.__prepare_data(input, column_types)
+        self.__split_data_into_buckets(buckets)
         self.dataset_size = len(self.data)
         self.split_ratio = split_ratio
         random.shuffle(self.data)
+
+    def __prepare_data(self, input, column_types):
+        for i in range(len(column_types)):
+            self.info.append(dict())
+
+        for row in input:
+            for i in range(len(row) - 1):
+                if column_types[i] == 'e':
+                    if row[i] not in self.info[i]:
+                        self.info[i][row[i]] = len(self.info[i])
+                    row[i] = self.info[i][row[i]]
+                else:
+                    elem = float(row[i])
+                    if 'min' not in self.info[i] or elem < self.info[i]['min']:
+                        self.info[i]['min'] = elem
+                    if 'max' not in self.info[i] or elem > self.info[i]['max']:
+                        self.info[i]['max'] = elem
+                    row[i] = elem
+
+            self.data.append(row)
+
+    def __split_data_into_buckets(self, buckets):
+        for row in self.data:
+            next_row = []
+            for i in range(len(row) - 1):
+                if self.column_types[i] == 'n':
+                    _min = self.info[i]['min']
+                    _max = self.info[i]['max']
+                    bucket = floor(buckets * (row[i] - _min) / (_max - _min))
+                    if bucket >= buckets:   # occurs only when row[i] == max column_value
+                        bucket = buckets - 1
+                    next_row.append(bucket)
+                else:
+                    next_row.append(row[i])
+
+            self.data_buckets.append(next_row)
 
     def getTrainSet(self):
         return self.data[:floor(self.dataset_size * self.split_ratio)]
