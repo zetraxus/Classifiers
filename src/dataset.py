@@ -42,12 +42,12 @@ class Dataset:
                     _min = self.info[i]['min']
                     _max = self.info[i]['max']
                     bucket = floor(buckets * (row[i] - _min) / (_max - _min))
-                    if bucket >= buckets:   # occurs only when row[i] == max column_value
+                    if bucket >= buckets:  # occurs only when row[i] == max column_value
                         bucket = buckets - 1
                     next_row.append(bucket)
                 else:
                     next_row.append(row[i])
-            next_row.append(row[len(row)-1])
+            next_row.append(row[len(row) - 1])
             self.data_in_buckets.append(next_row)
 
     def get_train_set(self, buckets=False):

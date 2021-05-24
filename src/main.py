@@ -4,7 +4,6 @@ from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 from src.algorithms.lcpc import LCPC
 from src.algorithms.naive_bayes import NaiveBayes
-from src.algorithms.sprint import SPRINT
 from src.dataset import Dataset
 
 
@@ -21,6 +20,12 @@ def save_results(metrics, ds_name, classifier_name):
     print(ds_name, classifier_name, metrics[1])
 
 
+def create_dataset(ds_path, ds_name):
+    with open(ds_path + ds_name + ".csv") as f:
+        csv_input = csv.reader(f, delimiter=',')
+        return Dataset(csv_input, train_ratio, datasets_info[ds_name], buckets)
+
+
 if __name__ == "__main__":
     dataset_path, train_ratio, buckets = "../data/", 0.8, 10
     datasets_info = {
@@ -33,39 +38,27 @@ if __name__ == "__main__":
     }
 
     for ds_name in datasets_info.keys():
-        with open(dataset_path + ds_name + ".csv") as f:
-            csv_input = csv.reader(f, delimiter=',')
-            # create dataset object
-            dataset = Dataset(csv_input, train_ratio, datasets_info[ds_name], buckets)
+        dataset = create_dataset(dataset_path, ds_name)
+        # classifiers = [NaiveBayes(), LCPC(), SPRINT()]
+        classifiers = [NaiveBayes(), LCPC()]
 
-        nb, lcpc, sprint = NaiveBayes(), LCPC(), SPRINT()
-
-        # classifiers = [nb, lcpc, sprint]
-        classifiers = [nb, lcpc]
         for classifier in classifiers:
             if classifier.__class__.__name__ in ["NaiveBayes", "SPRINT"]:
-                train_ds = dataset.get_train_set(buckets=True)
-                test_ds = dataset.get_test_set(buckets=True)
+                train_ds, test_ds = dataset.get_train_set(buckets=True), dataset.get_test_set(buckets=True)
             else:
-                train_ds = dataset.get_train_set(buckets=False)
-                test_ds = dataset.get_test_set(buckets=False)
-
+                train_ds, test_ds = dataset.get_train_set(buckets=False), dataset.get_test_set(buckets=False)
             # train
             classifier.train(train_ds)
-
             # test
-            true, predicted = [], []
-            i = 0
+            true, predicted, i = [], [], 0
             for row in test_ds:
                 i += 1
-                if i == 300:
+                if i == 20:
                     break
                 sample, gt = row[:-1], row[-1]
                 predicted_class = classifier.predict(sample)
                 true.append(gt), predicted.append(predicted_class)
-
             # calc metrics
             metrics = calc_metrics(true, predicted)
-
             # save results
             save_results(metrics, ds_name, classifier.__class__.__name__)
