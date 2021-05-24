@@ -58,7 +58,7 @@ if __name__ == "__main__":
             i = 0
             for row in test_ds:
                 i += 1
-                if i == 20:
+                if i == 300:
                     break
                 sample, gt = row[:-1], row[-1]
                 predicted_class = classifier.predict(sample)
