@@ -124,3 +124,6 @@ class LCPC(Algorithm):
             return rating[0][0]
         else:
             return self.__most_popular_class()
+
+    def __str__(self):
+        return self.__class__.__name__

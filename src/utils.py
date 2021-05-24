@@ -1,6 +1,6 @@
 import csv
 
-from sklearn.metrics import precision_recall_fscore_support, accuracy_score, classification_report
+from sklearn.metrics import classification_report
 
 from src.dataset import Dataset
 
@@ -27,8 +27,8 @@ def calc_metrics(true, predicted):
     return classification_report(true, predicted, zero_division=0)
 
 
-def save_results(results_report, ds_name, classifier_name):
-    print(ds_name, classifier_name)
+def save_results(results_report, ds_name, classifier):
+    print(ds_name, classifier)
     print(results_report)
     print("============")
 

@@ -2,23 +2,24 @@ from src.algorithm import Algorithm
 
 
 class NaiveBayes(Algorithm):
-    def __init__(self):
+    def __init__(self, laplace_smoothing=0):
         super().__init__()
-        self.histogram_classes = None
-        self.histogram_all = None
+        self.hist_cl = None
+        self.hist_all = None
         self.train_ds_size = None
         self.attr_cnt = None
+        self.smth = laplace_smoothing
         self.class_distr = dict()
 
     def train(self, ds):
-        self.histogram_classes = self.__calc_attr_values_histogram(ds)
-        self.histogram_all = self.__calc_all_attr_values_histogram()
+        self.hist_cl = self.__calc_attr_values_histogram(ds)
+        self.hist_all = self.__calc_all_attr_values_histogram()
         self.train_ds_size = len(ds)
 
     def predict(self, sample):
         probabilities = list()
 
-        for cl in self.histogram_classes:
+        for cl in self.hist_cl:
             prob = self.__calc_prob(cl, sample)
             probabilities.append((cl, prob))
 
@@ -56,7 +57,7 @@ class NaiveBayes(Algorithm):
         histogram_all = list()
         for i in range(self.attr_cnt - 1):
             histogram_all.append(dict())
-            for v in self.histogram_classes.values():
+            for v in self.hist_cl.values():
                 for attr_val, cnt in v[i].items():
                     if attr_val in histogram_all[i]:
                         histogram_all[i][attr_val] += cnt
@@ -68,9 +69,9 @@ class NaiveBayes(Algorithm):
     def __calc_prob(self, cl, sample):
         prob = 1
         for attr_id in range(len(sample)):
-            if sample[attr_id] in self.histogram_classes[cl][attr_id]:
-                prob *= (self.histogram_classes[cl][attr_id][sample[attr_id]] / self.class_distr[cl])
-                prob /= self.histogram_all[attr_id][sample[attr_id]]
+            if sample[attr_id] in self.hist_cl[cl][attr_id]:
+                prob *= (self.hist_cl[cl][attr_id][sample[attr_id]] + self.smth) / (self.class_distr[cl] + self.smth)
+                prob /= self.hist_all[attr_id][sample[attr_id]]
             else:
                 prob = 0
         prob *= self.class_distr[cl] / self.train_ds_size
@@ -83,3 +84,6 @@ class NaiveBayes(Algorithm):
             if v > cnt:
                 cl, cnt = k, v
         return cl
+
+    def __str__(self):
+        return self.__class__.__name__ + " " + str(self.smth)
