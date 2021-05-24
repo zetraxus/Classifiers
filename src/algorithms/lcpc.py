@@ -101,8 +101,9 @@ class LCPC(Algorithm):
                 cl = list(option_dict.keys())[0]
                 cnt = option_dict[cl]
                 if class_name == "" or class_name == cl:
+                    if cnt > class_cnt: # TODO check it
+                        class_cnt = cnt
                     class_name = cl
-                    class_cnt += cnt
                 else:
                     return False, None, None
         return True, class_name, class_cnt

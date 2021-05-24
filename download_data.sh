@@ -28,6 +28,8 @@ mv data/bank-full.csv data/bank.csv
 sed -i '1d' data/bank.csv
 sed -i 's/;/,/g' data/bank.csv
 sed -i 's/"//g' data/bank.csv
+cut -d, -f10-11,14 --complement data/bank.csv >> data/bank_temp.csv
+mv data/bank_temp.csv data/bank.csv
 
 sed -i 's/\t/,/g' data/skin.txt
 sed -i 's/ /,/g' data/skin.txt
