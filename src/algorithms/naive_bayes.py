@@ -83,10 +83,12 @@ class NaiveBayes(Algorithm):
                 prob /= self.class_distr[cl] + self.attr_cnt * self.smth
 
                 if sample[attr_id] in self.hist_all[attr_id]:
-                    prob /= (self.smth + self.hist_all[attr_id][sample[attr_id]]) / (
-                            self.train_ds_size + self.attr_cnt * self.smth)
+                    prob /= self.smth + self.hist_all[attr_id][sample[attr_id]]
                 else:
-                    prob /= self.smth / (self.train_ds_size + self.attr_cnt * self.smth)
+                    prob /= self.smth
+
+                prob *= self.train_ds_size + self.attr_cnt * self.smth
+
         prob *= self.class_distr[cl] / self.train_ds_size
         return prob
 
