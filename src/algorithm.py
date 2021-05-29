@@ -2,7 +2,7 @@ class Algorithm:
     def __init__(self):
         pass
 
-    def train(self, ds):
+    def train(self, ds, column_info):
         pass
 
     def predict(self, sample):

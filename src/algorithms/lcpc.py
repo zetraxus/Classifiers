@@ -11,16 +11,19 @@ class LCPC(Algorithm):
 
     def __init__(self):
         super().__init__()
+        self.threshold = 0.05
         self.class_distr = dict()
+        self.column_info = None
 
-    def train(self, ds):
+    def train(self, ds, column_info):
         self.data = np.array(ds)
+        self.column_info = column_info
+
         for row in self.data:
             cl = row[-1]
             if cl not in self.class_distr:
-                self.class_distr[cl] = 1
-            else:
-                self.class_distr[cl] += 1
+                self.class_distr[cl] = 0
+            self.class_distr[cl] += 1
 
     def predict(self, sample):
         filtered_dataset = self.__filter_dataset(sample)
@@ -52,7 +55,7 @@ class LCPC(Algorithm):
             if success:
                 if cl_name not in pattern_matches:
                     pattern_matches[cl_name] = 0
-                pattern_matches[cl_name] += cl_cnt
+                pattern_matches[cl_name] = max(pattern_matches[cl_name], cl_cnt)
 
         return pattern_matches
 
@@ -67,20 +70,24 @@ class LCPC(Algorithm):
     def __filter_dataset(self, sample):
         filtered_dataset = dict()
         for i in range(self.data.shape[0]):
-            useful_row, row = False, ""
+            row = ""
             for j in range(len(sample)):
-                if sample[j] == self.data[i][j]:
-                    row, useful_row = f'{row}1', True
-                else:
-                    row = f'{row}0'
+                row = self.__check_cell(sample, i, j, row)
 
-            if useful_row:
+            if '1' in row:
                 if row not in filtered_dataset:
                     filtered_dataset[row] = dict()
                 if self.data[i][-1] not in filtered_dataset[row]:
                     filtered_dataset[row][self.data[i][-1]] = 0
                 filtered_dataset[row][self.data[i][-1]] += 1
         return filtered_dataset
+
+    def __check_cell(self, sample, i, j, row):
+        diff = self.threshold * self.column_info[0][j]['diff'] if self.column_info[1][j] == 'nc' else 0
+        if float(self.data[i][j]) - diff <= sample[j] <= float(self.data[i][j]) + diff:
+            return f'{row}1'
+        else:
+            return f'{row}0'
 
     @staticmethod
     def __check_pattern(pattern, sample):
@@ -101,8 +108,7 @@ class LCPC(Algorithm):
                 cl = list(option_dict.keys())[0]
                 cnt = option_dict[cl]
                 if class_name == "" or class_name == cl:
-                    if cnt > class_cnt:  # TODO check it
-                        class_cnt = cnt
+                    class_cnt += cnt
                     class_name = cl
                 else:
                     return False, None, None
@@ -120,7 +126,7 @@ class LCPC(Algorithm):
         if len(results):
             for k, v in results.items():
                 rating.append((k, v / self.class_distr[k]))
-            rating.sort(key=lambda tup: tup[1])
+            rating.sort(key=lambda tup: tup[1], reverse=True)
             return rating[0][0]
         else:
             return self.__most_popular_class()
