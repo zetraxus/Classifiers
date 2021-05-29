@@ -3,7 +3,7 @@ from src.algorithms.naive_bayes import NaiveBayes
 from src.utils import create_dataset, train, test, save_results, split_dataset
 
 if __name__ == "__main__":
-    dataset_path, train_ratio, buckets = "../data/", 0.8, 10
+    dataset_path, train_ratio, buckets = "../data/", 0.9, 10
     datasets_info = {
         "occupancy": ['nc'] * 5,
         "skin": ['nc'] * 3,
