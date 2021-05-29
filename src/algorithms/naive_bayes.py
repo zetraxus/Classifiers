@@ -11,7 +11,7 @@ class NaiveBayes(Algorithm):
         self.smth = laplace_smoothing
         self.class_distr = dict()
 
-    def train(self, ds):
+    def train(self, ds, column_info):
         self.hist_cl = self.__calc_attr_values_histogram(ds)
         self.hist_all = self.__calc_all_attr_values_histogram()
         self.train_ds_size = len(ds)
@@ -32,14 +32,15 @@ class NaiveBayes(Algorithm):
 
     def __calc_attr_values_histogram(self, ds):
         histogram_cl = dict()
+        self.attr_cnt = len(ds[0]) - 1
         for row in ds:
-            self.attr_cnt, cl = len(row), row[-1]
+            cl = row[-1]
             if cl not in histogram_cl:
                 histogram_cl[cl] = list()
-                for _ in range(len(row) - 1):
+                for _ in range(self.attr_cnt):
                     histogram_cl[cl].append(dict())
 
-            for i in range(len(row) - 1):
+            for i in range(self.attr_cnt):
                 attr = row[i]
                 if attr not in histogram_cl[cl][i]:
                     histogram_cl[cl][i][attr] = 1
@@ -55,7 +56,7 @@ class NaiveBayes(Algorithm):
 
     def __calc_all_attr_values_histogram(self):
         histogram_all = list()
-        for i in range(self.attr_cnt - 1):
+        for i in range(self.attr_cnt):
             histogram_all.append(dict())
             for v in self.hist_cl.values():
                 for attr_val, cnt in v[i].items():
@@ -67,15 +68,44 @@ class NaiveBayes(Algorithm):
         return histogram_all
 
     def __calc_prob(self, cl, sample):
+        return self.__calc_prob_with_smoothing(cl, sample) if self.smth else self.__calc_prob_without_smoothing(cl,
+                                                                                                                sample)
+
+    def __calc_prob_with_smoothing(self, cl, sample):
+        prob = 1
+        for attr_id in range(len(sample)):
+            if self.smth:
+                if sample[attr_id] in self.hist_cl[cl][attr_id]:
+                    prob *= self.hist_cl[cl][attr_id][sample[attr_id]] + self.smth
+                else:
+                    prob *= self.smth
+
+                prob /= self.class_distr[cl] + self.attr_cnt * self.smth
+
+                if sample[attr_id] in self.hist_all[attr_id]:
+                    prob /= self.smth + self.hist_all[attr_id][sample[attr_id]]
+                else:
+                    prob /= self.smth
+
+                prob *= self.train_ds_size + self.attr_cnt * self.smth
+
+        prob *= self.class_distr[cl] / self.train_ds_size
+        return prob
+
+    def __calc_prob_without_smoothing(self, cl, sample):
         prob = 1
         for attr_id in range(len(sample)):
             if sample[attr_id] in self.hist_cl[cl][attr_id]:
-                prob *= (self.hist_cl[cl][attr_id][sample[attr_id]] + self.smth) / (self.class_distr[cl] + self.smth)
-                prob /= self.hist_all[attr_id][sample[attr_id]]
+                prob *= self.hist_cl[cl][attr_id][sample[attr_id]] / self.class_distr[cl]
             else:
-                prob = 0
-        prob *= self.class_distr[cl] / self.train_ds_size
+                return 0
 
+            if sample[attr_id] in self.hist_all[attr_id]:
+                prob /= self.hist_all[attr_id][sample[attr_id]] / self.train_ds_size
+            else:
+                return 0
+
+        prob *= self.class_distr[cl] / self.train_ds_size
         return prob
 
     def __most_popular_class(self):

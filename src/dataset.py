@@ -34,11 +34,15 @@ class Dataset:
 
             self.data.append(row)
 
+        for i in range(len(self.info)):
+            if self.column_types[i] == 'nc':
+                self.info[i]['diff'] = self.info[i]['max'] - self.info[i]['min']
+
     def __split_data_into_buckets(self, buckets):
         for row in self.data:
             next_row = []
             for i in range(len(row) - 1):
-                if self.column_types[i] == 'n':
+                if self.column_types[i] != 'e':
                     _min = self.info[i]['min']
                     _max = self.info[i]['max']
                     bucket = floor(buckets * (row[i] - _min) / (_max - _min))
@@ -63,3 +67,6 @@ class Dataset:
             return self.data_in_buckets[split_position:]
         else:
             return self.data[split_position:]
+
+    def get_info(self):
+        return self.info, self.column_types

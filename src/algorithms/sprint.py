@@ -39,7 +39,7 @@ class SPRINT(Algorithm):
         self.min_elements = min_elements
         self.tree = None
 
-    def train(self, ds):
+    def train(self, ds, column_info):
         data_set = np.array(ds)
         self.tree = self.__partition(data_set)
 

@@ -5,15 +5,15 @@ from sklearn.metrics import classification_report
 from src.dataset import Dataset
 
 
-def train(classifier, train_ds):
-    classifier.train(train_ds)
+def train(classifier, train_ds, column_info):
+    classifier.train(train_ds, column_info)
 
 
 def test(classifier, test_ds):
     true, predicted, i = [], [], 0
     for row in test_ds:
         i += 1
-        if i == 30:
+        if i == 10:
             break
         sample, gt = row[:-1], row[-1]
         predicted_class = classifier.predict(sample)
