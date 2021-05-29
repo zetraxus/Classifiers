@@ -11,13 +11,16 @@ class LCPC(Algorithm):
 
     def __init__(self):
         super().__init__()
-        self.threshold = 0.05
+        self.threshold = 0.03
         self.class_distr = dict()
         self.column_info = None
+        self.most_popular_class = None
+        self.powers = None
 
     def train(self, ds, column_info):
         self.data = np.array(ds)
         self.column_info = column_info
+        self.powers = [2 ** i for i in range(len(self.data[0]))]
 
         for row in self.data:
             cl = row[-1]
@@ -25,13 +28,16 @@ class LCPC(Algorithm):
                 self.class_distr[cl] = 0
             self.class_distr[cl] += 1
 
+        self.most_popular_class = self.__most_popular_class()
+
     def predict(self, sample):
         filtered_dataset = self.__filter_dataset(sample)
         results = dict()
 
         for i in range(1, len(sample) + 1):
-            pattern_matches = dict()
             patterns = list(self.__generate_combinations(len(sample), i))
+            pattern_matches = dict()
+
             for p in patterns:
                 pattern_matches = self.__analyse_pattern(p, filtered_dataset, pattern_matches)
 
@@ -59,22 +65,22 @@ class LCPC(Algorithm):
 
         return pattern_matches
 
-    @staticmethod
-    def __generate_combinations(length, count):
+    def __generate_combinations(self, length, count):
         for positions in combinations(range(length), count):
-            p = ["0"] * length
+            p = 0
             for i in positions:
-                p[i] = "1"
-            yield ''.join(p)
+                p += self.powers[i]
+            yield p
 
     def __filter_dataset(self, sample):
         filtered_dataset = dict()
         for i in range(self.data.shape[0]):
-            row = ""
+            row = 0
             for j in range(len(sample)):
-                row = self.__check_cell(sample, i, j, row)
+                if self.__check_cell(sample, i, j):
+                    row += self.powers[j]
 
-            if '1' in row:
+            if row > 0:
                 if row not in filtered_dataset:
                     filtered_dataset[row] = dict()
                 if self.data[i][-1] not in filtered_dataset[row]:
@@ -82,20 +88,13 @@ class LCPC(Algorithm):
                 filtered_dataset[row][self.data[i][-1]] += 1
         return filtered_dataset
 
-    def __check_cell(self, sample, i, j, row):
+    def __check_cell(self, sample, i, j):
         diff = self.threshold * self.column_info[0][j]['diff'] if self.column_info[1][j] == 'nc' else 0
-        if float(self.data[i][j]) - diff <= sample[j] <= float(self.data[i][j]) + diff:
-            return f'{row}1'
-        else:
-            return f'{row}0'
+        return float(self.data[i][j]) - diff <= sample[j] <= float(self.data[i][j]) + diff
 
     @staticmethod
     def __check_pattern(pattern, sample):
-        for i in range(len(pattern)):
-            if pattern[i] == '1':
-                if sample[i] != '1':
-                    return False
-        return True
+        return pattern & sample == pattern
 
     @staticmethod
     def __check_options(filtered_dataset, options):
@@ -123,13 +122,13 @@ class LCPC(Algorithm):
 
     def __best_match_class(self, results):
         rating = list()
-        if len(results):
+        if results:
             for k, v in results.items():
                 rating.append((k, v / self.class_distr[k]))
             rating.sort(key=lambda tup: tup[1], reverse=True)
             return rating[0][0]
         else:
-            return self.__most_popular_class()
+            return self.most_popular_class
 
     def __str__(self):
         return self.__class__.__name__

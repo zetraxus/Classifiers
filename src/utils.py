@@ -13,7 +13,7 @@ def test(classifier, test_ds):
     true, predicted, i = [], [], 0
     for row in test_ds:
         i += 1
-        if i == 10:
+        if i == 30:
             break
         sample, gt = row[:-1], row[-1]
         predicted_class = classifier.predict(sample)
