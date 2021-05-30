@@ -82,8 +82,6 @@ class SPRINT(Algorithm):
             if len(criteria) == 0:
                 continue
             for criterion_value in criteria:
-                # val = criterion_value if isinstance(criterion_value, list) else float(criterion_value)
-                # criterion = Criterion(attr_idx, attr_type, val)
                 criterion = Criterion(attr_idx, attr_type, criterion_value)
                 gini = self.__calculate_gini_split(data_set, criterion)
                 gini_set.append((criterion, gini))
