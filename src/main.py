@@ -1,3 +1,5 @@
+import time
+
 from src.algorithms.lcpc import LCPC
 from src.algorithms.naive_bayes import NaiveBayes
 from src.algorithms.sprint import SPRINT
@@ -27,7 +29,9 @@ if __name__ == "__main__":
         ]
 
         for classifier in classifiers:
+            start = time.time()
             train_ds, test_ds = split_dataset(dataset, classifier.__class__.__name__)
             train(classifier, train_ds, column_info=dataset.get_info())
             results_report = test(classifier, test_ds)
-            save_results(results_report, ds_name, classifier)
+            end = time.time()
+            save_results(results_report, ds_name, classifier, end - start)

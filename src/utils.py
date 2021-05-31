@@ -1,6 +1,7 @@
 import csv
 
 from sklearn.metrics import classification_report
+from tqdm import tqdm
 
 from src.dataset import Dataset
 
@@ -11,14 +12,13 @@ def train(classifier, train_ds, column_info):
 
 def test(classifier, test_ds):
     true, predicted, i = [], [], 0
-    for row in test_ds:
+    for row in tqdm(test_ds):
         i += 1
-        if i == 30:
+        if i == 100:
             break
         sample, gt = row[:-1], row[-1]
         predicted_class = classifier.predict(sample)
         true.append(gt), predicted.append(predicted_class)
-
     return calc_metrics(true, predicted)
 
 
@@ -27,8 +27,8 @@ def calc_metrics(true, predicted):
     return classification_report(true, predicted, zero_division=0)
 
 
-def save_results(results_report, ds_name, classifier):
-    print(ds_name, classifier)
+def save_results(results_report, ds_name, classifier, time):
+    print(ds_name, classifier, round(time, 2))
     print(results_report)
     print("============")
 
