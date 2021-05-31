@@ -11,7 +11,7 @@ class LCPC(Algorithm):
 
     def __init__(self):
         super().__init__()
-        self.threshold = 0.03
+        self.threshold = 0.01
         self.class_distr = dict()
         self.column_info = None
         self.most_popular_class = None
